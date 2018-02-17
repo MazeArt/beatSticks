@@ -1,0 +1,85 @@
+////https://forum.processing.org/one/topic/rotate-cube-sensor.html 
+float xx,yy,zz;
+import processing.serial.*;     // import the Processing serial library
+Serial myPort;                  // The serial port
+
+float bgcolor;            // Background color
+float fgcolor;            // Fill color
+float xpos, ypos;            // Starting position of the ball
+
+void settings() {
+  size(640,480, P3D);
+}
+void setup() {
+  // List all the available serial ports
+  //println(Serial.list());
+  myPort = new Serial(this, "/dev/cu.usbmodem1421", 115200);
+
+  // read bytes into a buffer until you get a linefeed (ASCII 10):
+  myPort.bufferUntil('\n');
+  
+  // draw with smooth edges:
+  smooth();
+}
+
+void draw() {
+  while(myPort.available() > 0 ){ 
+  // read the serial buffer:
+  String myString = myPort.readStringUntil('\n');
+  if (myString != null) {
+  // if you got any bytes other than the linefeed:
+  
+    myString = trim(myString);
+   //println(myString); //to see what's happening
+ 
+    // Identify the 
+    // and convert the sections into integers:
+  if(myString.substring(0,4).equals("roll")==true){
+   println(myString);
+   int stringLen = myString.length();
+   println(stringLen);
+   
+   stringLen = myString.indexOf(":") +1 ; //search that char into the string and starts from the right next to it.
+   println(stringLen);
+        myString = myString.substring(stringLen);
+        println(myString);
+        float sensors[] = float(split(myString, ','));
+        
+    
+//println("roll: " + sensors[0] + " pitch: " + sensors[1] + " yaw: " + sensors[2] + "\t");
+    // print out the values you got:
+    for (int sensorNum = 0; sensorNum < sensors.length; sensorNum++) {
+      //print("Sensor " + sensorNum + ": " + sensors[sensorNum] + "\t"); 
+      if (sensorNum == 0) {
+        xx = sensors[0];
+      }
+      if (sensorNum == 1) {
+        yy = sensors[1];
+      }
+      if (sensorNum == 2) {
+        zz = sensors[2];
+      }
+    }
+    }
+    // add a linefeed after all the sensor values are printed:
+    //println();
+
+    // send a byte to ask for more data:
+ //   myPort.write("A");
+  }
+}
+  
+  background(0);
+  noStroke();
+  translate(width/2, height/2);
+  pushMatrix();
+  
+ rotateX(yy);//roll?
+  rotateY(zz);//yaw
+  rotateZ(xx);//pitch
+  box(300, 20, 50);
+  popMatrix();
+ // println("roll: " + xx);
+ // println("pitch: " + yy);
+ // println("Yaw: " + zz);
+}
